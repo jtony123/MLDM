@@ -15,9 +15,9 @@ import data.Position;
  */
 public class DecisionTree<T> implements DecisionTreeInterface<T> {
 
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 	private DecisionNodeInterface<T> root;
-	private double thresholdMarker;
+	//private double thresholdMarker;
 
 	public DecisionTree()
 	{
@@ -27,20 +27,19 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	public DecisionTree(T rootData)
 	{
 		root = new DecisionNode<T>(rootData);
-	} // end constructor
+	}
 
-	public DecisionTree(T rootData, T threshold, DecisionTree<T> leftTree, 
-			DecisionTree<T> rightTree)
+	public DecisionTree(T rootData, T threshold, String attLabel, DecisionTree<T> leftTree, DecisionTree<T> rightTree)
 	{
 		
-		privateSetTree(rootData, threshold, leftTree, rightTree);
+		privateSetTree(rootData, threshold, attLabel, leftTree, rightTree);
 	} 
 	
-	public DecisionTree(T rootData, DecisionTree<T> leftTree, 
-			DecisionTree<T> rightTree)
-	{
-		privateSetTree(rootData, null, leftTree, rightTree);
-	} 
+//	public DecisionTree(T rootData, DecisionTree<T> leftTree, 
+//			DecisionTree<T> rightTree)
+//	{
+//		privateSetTree(rootData, null, null, leftTree, rightTree);
+//	} 
 
 	public void setTree(T rootData)
 	{
@@ -50,16 +49,18 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	public void setTree(T rootData, DecisionTreeInterface<T> leftTree,
 			DecisionTreeInterface<T> rightTree)
 	{
-		privateSetTree(rootData, null, (DecisionTree<T>)leftTree, 
+		privateSetTree(rootData, null, null, (DecisionTree<T>)leftTree, 
 				(DecisionTree<T>)rightTree);
 	} // end setTree
 
 	// 26.08
-	private void privateSetTree(T rootData, T threshold, DecisionTree<T> leftTree, 
+	private void privateSetTree(T rootData, T threshold, String attLabel, DecisionTree<T> leftTree, 
 			DecisionTree<T> rightTree)
 	{
-		thresholdMarker = (double) threshold;
+		//thresholdMarker = (double) threshold;
 		root = new DecisionNode<T>(rootData);
+		root.setThreshold((double) threshold);
+		root.setAttributeLabel(attLabel);
 
 		if ((leftTree != null) && !leftTree.isEmpty())
 			root.setLeftChild(leftTree.root);
@@ -159,26 +160,38 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	
 	
 	
-	public ArrayList<ArrayList<String>> displayTree(ArrayList<ArrayList<Position>> allrows) 
+	public void displayTree() 
 	{
 		int depth = 0;
-		int latitude = 0;
-		displayTree(root, allrows, depth, latitude);
-		return null;
+		displayTree(root, depth);
 	} 
 
-	private ArrayList<ArrayList<Position>> displayTree(DecisionNodeInterface<T> node, ArrayList<ArrayList<Position>> allrows, int depth, int latitude) 
+	private void displayTree(DecisionNodeInterface<T> node, int depth) 
 	{
 		if (node != null)			
 		{
-			Position p = new Position(node.getData().toString(), depth, latitude);
-			allrows.get(depth).add(p);
 			++depth;
-			displayTree(node.getLeftChild(), allrows, depth, latitude-1);
 			
-			displayTree(node.getRightChild(), allrows, depth, latitude+1);
+			displayTree(node.getLeftChild(), depth);
+			
+			
+			String attributeLabel = null;
+			if(node.getAttributeLabel()!=null){
+				attributeLabel = node.getAttributeLabel();
+				for(int spaces = depth*2;spaces>=0;--spaces){
+					System.out.print(" ");
+				}
+				System.out.print(attributeLabel + " : < " + node.getThreshold());
+			} else {
+				for(int spaces = depth;spaces>=0;--spaces){
+					System.out.print(" ");
+				}
+				System.out.println(node.getData());
+			}
+			
+			
+			displayTree(node.getRightChild(), depth);
 		}
-		return allrows;
 	}
 	
 	
@@ -203,7 +216,8 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	    // to test for equality on
 	    if (rootEntry instanceof Integer){
 	    	
-	    	if((double)instance.getAttributes().get((int) rootEntry).getValue() <= thresholdMarker){
+	    	//if((double)instance.getAttributes().get((int)rootEntry).getValue() <= thresholdMarker){
+	    	if((double)instance.getAttributes().get((int)rootEntry).getValue() <= rootNode.getThreshold()){
 	    		result = findEntry(rootNode.getLeftChild(), instance);
 	    	} else {
 	    		result = findEntry(rootNode.getRightChild(), instance);
@@ -212,18 +226,11 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	    } else {
 	    	result = rootEntry;
 	    }
-	  } // end if
+	  }
 	  
 	  return result;
-	} // end findEntry
+	}
 
-	/* (non-Javadoc)
-	 * @see tree.DecisionTreeInterface#setTree(java.lang.Object, tree.DecisionTreeInterface, tree.DecisionTreeInterface)
-	 */
-	//@Override
-	//public void setTree(T rootData, DecisionTreeInterface<T> leftTree, DecisionTreeInterface<T> rightTree) {
-		// TODO Auto-generated method stub
-		
-	//}
 
-} // end BinaryTree
+
+}

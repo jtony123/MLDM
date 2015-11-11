@@ -11,11 +11,13 @@ package data;
 public class Position {
 
 	String data;
+	String attributeLabel;
 	int depth;
 	int latitude;
 	
-	public Position(String dat, int d, int l){
+	public Position(String dat, String aL, int d, int l){
 		data = dat;
+		attributeLabel = aL;
 		depth = d;
 		latitude = l;
 	}
@@ -32,6 +34,20 @@ public class Position {
 	 */
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	/**
+	 * @return the attributeLabel
+	 */
+	public String getAttributeLabel() {
+		return attributeLabel;
+	}
+
+	/**
+	 * @param attributeLabel the attributeLabel to set
+	 */
+	public void setAttributeLabel(String attributeLabel) {
+		this.attributeLabel = attributeLabel;
 	}
 
 	/**

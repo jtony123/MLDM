@@ -21,6 +21,7 @@ public class ID3 {
 	int atIndex = -1;
 	public static String defaultClass ="Owl";
 	List<String> classes;
+	List<String> attributeLabels;
 
 	public ID3(){
 		
@@ -30,7 +31,11 @@ public class ID3 {
 		classes = allClasses;
 	}
 	
-	public DecisionTree<Object> ID3(List<Instance> instances, List<Integer> attributesToTest){
+	public void setAttributeLabels(List<String> attLabels) {		
+		attributeLabels = attLabels;
+	}
+	
+	public DecisionTree<Object> buildTree(List<Instance> instances, List<Integer> attributesToTest){
 		
 		DecisionTree<Object> tree;
 //		Input:	Examples:set of classified examples
@@ -47,7 +52,7 @@ public class ID3 {
 		
 		else if(allSameClass(instances)){
 			//System.out.println("all same class");
-			String allThisClass = instances.get(0).getClassAttribute();//.getAttributes().get(4).getValue();
+			String allThisClass = instances.get(0).getClassAttribute();;
 			tree = new DecisionTree<>(allThisClass);			
 			return tree;
 		}
@@ -75,22 +80,14 @@ public class ID3 {
 			double bestAttributeThreshold = 0;
 			
 			
-			// outer loop across all attributes
-			//attributesToTest
-			//for(;i<attributesToTest.size();++i){
+			// outer loop iterates across each row of remaining attribute values
+			// to ascertain which attribute best separtes the data
+			
 			for(Integer n : attributesToTest){	
-			//for(;i<4;++i){
+		
+				
+				instances = sortInstancesByAttribute(instances, n);
 
-				Collections.sort(instances, new Comparator<Instance>() {			
-					@Override
-					public int compare(Instance instance1, Instance instance2) {
-						return (int)((Double) instance1.getAttributes().get(n).getValue()).compareTo((Double) instance2.getAttributes().get(n).getValue());
-					}
-				});
-
-				double totbarncount = 0.0;
-				double totsnowycount = 0.0;
-				double totlongearcount = 0.0;
 				double maxValue = 0.0;
 				double minValue = 10.0;
 				
@@ -104,14 +101,6 @@ public class ID3 {
 					minValue = (double)ins.getAttributes().get(n).getValue() < minValue?(double)ins.getAttributes().get(n).getValue():minValue;
 					maxValue = (double)ins.getAttributes().get(n).getValue() > maxValue?(double)ins.getAttributes().get(n).getValue():maxValue;
 
-					// get the count of each classification in this subset of the data 
-					if(ins.getAttributes().get(4).getValue().equals("BarnOwl")){
-						totbarncount++;
-					} else if (ins.getAttributes().get(4).getValue().equals("SnowyOwl")){
-						totsnowycount++;
-					} else if(ins.getAttributes().get(4).getValue().equals("LongEaredOwl")){
-						totlongearcount++;
-					}
 				}
 				double totalNumInstances = (double)instances.size();								
 				double bestGainThisAttribute = 10.0;
@@ -149,6 +138,8 @@ public class ID3 {
 						}			
 					}
 					
+					
+					// calculate the entropy on both sides of the split
 					double entropyBelowThreshold = 0;
 					double entropyAboveThreshold = 0;
 					for(int i = 0; i<classes.size();++i){
@@ -161,7 +152,7 @@ public class ID3 {
 						bestGainThisAttribute = result;
 						thresholdThisAttribute = threshold;						
 					}
-					//System.out.println();
+
 					thisValue = nextValue;
 					++counter;
 				} while(counter < instances.size());			
@@ -171,24 +162,12 @@ public class ID3 {
 					bestOverallAttribute = bestGainThisAttribute;
 					atIndex = n;
 				}
-				
-//				System.out.println("atIndex = "+atIndex);
-//				System.out.println("bestAttribute = "+bestOverallAttribute);
-//				System.out.println("maxOverallAt = "+bestAttributeThreshold);
-				
-			} // end for
-			
-			//System.out.println();
+								
+			}
 			
 			// we have found the attribute that best separates the data, now sort the instances by this attribute
 			// so we can split it at the threshold
-			Collections.sort(instances, new Comparator<Instance>() {			
-				@Override
-				public int compare(Instance o1, Instance o2) {
-					// TODO Auto-generated method stub
-					return (int)((Double) o1.getAttributes().get(atIndex).getValue()).compareTo((Double) o2.getAttributes().get(atIndex).getValue());
-				}
-			});
+			instances = sortInstancesByAttribute(instances, atIndex);
 			
 			// put all the instances in two separate lists, one for each side of the threshold
 			List<Instance> leftList = new ArrayList<Instance>();
@@ -203,12 +182,26 @@ public class ID3 {
 			// remove this attribute from the list before recurring the method
 			attributesToTest.remove(attributesToTest.indexOf(atIndex));
 			// induce the tree with this attribute as the decisionnode
-			tree = new DecisionTree<>(atIndex, bestAttributeThreshold, ID3(leftList, attributesToTest),ID3(rightList, attributesToTest));			
+			tree = new DecisionTree<>(atIndex, bestAttributeThreshold, attributeLabels.get(atIndex), buildTree(leftList, attributesToTest),buildTree(rightList, attributesToTest));			
 		}
 		return tree;		
 	}
 	
 	
+	/**
+	 * @param instances
+	 */
+	private List<Instance> sortInstancesByAttribute(List<Instance> instances, int n) {
+		
+		Collections.sort(instances, new Comparator<Instance>() {			
+			@Override
+			public int compare(Instance instance1, Instance instance2) {
+				return (int)((Double) instance1.getAttributes().get(n).getValue()).compareTo((Double) instance2.getAttributes().get(n).getValue());
+			}
+		});
+		return instances;
+	}
+
 	private int[] countClasses(List<Instance> instances){
 		int[] counters = new int[classes.size()];
 		for(Instance ins : instances){
@@ -277,6 +270,4 @@ public class ID3 {
 
 	}
 	
-	
-	
-}// end ID3 class
+}
