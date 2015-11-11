@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import data.Instance;
-import tree.BinaryTree;
+import tree.DecisionTree;
 
 /**
  * 
@@ -25,9 +25,9 @@ public class ID3 {
 		
 	}
 	
-	public BinaryTree<Object> ID3(List<Instance> instances, List<Integer> attributesToTest){
+	public DecisionTree<Object> ID3(List<Instance> instances, List<Integer> attributesToTest){
 		
-		BinaryTree<Object> tree;
+		DecisionTree<Object> tree;
 //		Input:	Examples:set of classified examples
 //				Attributes:set of attributes in the examples
 //				Target:classification to be predicted
@@ -35,7 +35,7 @@ public class ID3 {
 //		if Examples is empty then return a Default class
 		if(instances.isEmpty()){
 			//System.out.println("empty list");
-			tree = new BinaryTree<>(defaultClass);			
+			tree = new DecisionTree<>(defaultClass);			
 			return tree;
 		}
 //		else if all Examples have same class then return this class
@@ -43,14 +43,14 @@ public class ID3 {
 		else if(allSameClass(instances)){
 			//System.out.println("all same class");
 			String allThisClass = (String) instances.get(0).getAttributes().get(4).getValue();
-			tree = new BinaryTree<>(allThisClass);			
+			tree = new DecisionTree<>(allThisClass);			
 			return tree;
 		}
 		
 //		else if all Attributes are tested then return majority class
 		else if (attributesToTest.isEmpty()) {
 			String majorityClass = getMajorityClass(instances);
-			tree = new BinaryTree<>(majorityClass);			
+			tree = new DecisionTree<>(majorityClass);			
 			return tree;
 		}
 		
@@ -153,8 +153,7 @@ public class ID3 {
 							}
 						}			
 					}
-					//System.out.println("Instance count below = "+ insCount);
-
+					
 					double entropy1 = -1*(longearcount/insCount)*log(longearcount/insCount);
 					entropy1 += -1*(snowycount/insCount)*log(snowycount/insCount);
 					entropy1 += -1*(barncount/insCount)*log(barncount/insCount);
@@ -163,7 +162,22 @@ public class ID3 {
 					entropy2 += -1*((totsnowycount-snowycount)/(totalSize-insCount))*log((totsnowycount-snowycount)/(totalSize-insCount));
 					entropy2 += -1*((totbarncount-barncount)/(totalSize-insCount))*log((totbarncount-barncount)/(totalSize-insCount));
 					
-					double result = entropy1 + entropy2;
+					
+//					double entropy1 = (totlongearcount/totalSize)*(-1*(longearcount/insCount)*log(longearcount/insCount));
+//					entropy1 += (totsnowycount/totalSize)*(-1*(snowycount/insCount)*log(snowycount/insCount));
+//					entropy1 += (totbarncount/totalSize)*(-1*(barncount/insCount)*log(barncount/insCount));
+//					
+//					double entropy2 = ((totalSize-totlongearcount)/totalSize)*(-1*((totlongearcount-longearcount)/(totalSize-insCount))*log((totlongearcount-longearcount)/(totalSize-insCount)));//(Math.log((totlongearcount-longearcount)/(totalSize-insCount))/Math.log(2));
+//					entropy2 += ((totalSize-totsnowycount)/totalSize)*(-1*((totsnowycount-snowycount)/(totalSize-insCount))*log((totsnowycount-snowycount)/(totalSize-insCount)));
+//					entropy2 += ((totalSize-totbarncount)/totalSize)*(-1*((totbarncount-barncount)/(totalSize-insCount))*log((totbarncount-barncount)/(totalSize-insCount)));
+//					
+//					double entS = -1*(totlongearcount/totalSize)*log(totlongearcount/totalSize);
+//					entS += -1*(totsnowycount/totalSize)*log(totlongearcount/totalSize);
+//					entS += -1*(totbarncount/totalSize)*log(totlongearcount/totalSize);
+					
+					
+					
+					double result = (entropy1 + entropy2);
 					if(result < bestGainThisAttribute){
 						bestGainThisAttribute = result;
 						thresholdThisAttribute = threshold;
@@ -180,9 +194,9 @@ public class ID3 {
 					atIndex = n;
 				}
 				
-				//System.out.println("atIndex = "+atIndex);
-				//System.out.println("bestAttribute = "+bestOverallAttribute);
-				//System.out.println("maxOverallAt = "+bestAttributeThreshold);
+//				System.out.println("atIndex = "+atIndex);
+//				System.out.println("bestAttribute = "+bestOverallAttribute);
+//				System.out.println("maxOverallAt = "+bestAttributeThreshold);
 				
 			} // end for
 			
@@ -205,8 +219,8 @@ public class ID3 {
 					rightList.add(instance);
 				}
 			}		
-			attributesToTest.remove(atIndex);
-			tree = new BinaryTree<>(atIndex, bestAttributeThreshold, ID3(leftList, attributesToTest),ID3(rightList, attributesToTest));			
+			attributesToTest.remove(attributesToTest.indexOf(atIndex));
+			tree = new DecisionTree<>(atIndex, bestAttributeThreshold, ID3(leftList, attributesToTest),ID3(rightList, attributesToTest));			
 		}
 		return tree;		
 	}

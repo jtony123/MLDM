@@ -3,6 +3,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import data.Instance;
@@ -91,7 +93,31 @@ public class CSVLoader {
 		this.instances = instances;
 	}
 
-
+	public List<ArrayList<Instance>> getSplit(double trainingPercentage){
+		
+		ArrayList<Instance> training = new ArrayList<Instance>();
+		ArrayList<Instance> testing = new ArrayList<Instance>();
+		
+		int numTrainingNeeded = (int)((double)instances.size()*trainingPercentage);
+		
+		Collections.shuffle(instances);
+		
+		int i = 0;
+		for(; i<numTrainingNeeded; ++i){			
+			training.add(instances.get(i));
+		}
+		for(;i<instances.size();++i){
+			testing.add(instances.get(i));
+		}
+		List<ArrayList<Instance>> bothLists = new ArrayList<>();
+		bothLists.add(training);
+		bothLists.add(testing);
+		
+		
+		return bothLists;
+	}
+	
+	
 	
 	
 	
