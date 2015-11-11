@@ -20,9 +20,14 @@ public class ID3 {
 	public static int i = 0;
 	int atIndex = -1;
 	public static String defaultClass ="Owl";
+	List<String> classes;
 
 	public ID3(){
 		
+	}
+	
+	public void setClasses(List<String> allClasses){
+		classes = allClasses;
 	}
 	
 	public DecisionTree<Object> ID3(List<Instance> instances, List<Integer> attributesToTest){
@@ -42,7 +47,7 @@ public class ID3 {
 		
 		else if(allSameClass(instances)){
 			//System.out.println("all same class");
-			String allThisClass = (String) instances.get(0).getAttributes().get(4).getValue();
+			String allThisClass = instances.get(0).getClassAttribute();//.getAttributes().get(4).getValue();
 			tree = new DecisionTree<>(allThisClass);			
 			return tree;
 		}
@@ -78,9 +83,8 @@ public class ID3 {
 
 				Collections.sort(instances, new Comparator<Instance>() {			
 					@Override
-					public int compare(Instance o1, Instance o2) {
-						// TODO Auto-generated method stub
-						return (int)((Double) o1.getAttributes().get(n).getValue()).compareTo((Double) o2.getAttributes().get(n).getValue());
+					public int compare(Instance instance1, Instance instance2) {
+						return (int)((Double) instance1.getAttributes().get(n).getValue()).compareTo((Double) instance2.getAttributes().get(n).getValue());
 					}
 				});
 
@@ -89,11 +93,14 @@ public class ID3 {
 				double totlongearcount = 0.0;
 				double maxValue = 0.0;
 				double minValue = 10.0;
-
-
+				
+				// each index position in the array corresponds to the same location in the
+				// arraylist of classes
+				int[] totalCounts = countClasses(instances);			
+				
 				
 				for(Instance ins : instances){
-					// get the range of the values of this attribute
+					// get the range of the values of attribute n
 					minValue = (double)ins.getAttributes().get(n).getValue() < minValue?(double)ins.getAttributes().get(n).getValue():minValue;
 					maxValue = (double)ins.getAttributes().get(n).getValue() > maxValue?(double)ins.getAttributes().get(n).getValue():maxValue;
 
@@ -106,19 +113,10 @@ public class ID3 {
 						totlongearcount++;
 					}
 				}
-				double totalSize = (double)instances.size();
-				//System.out.println("max = " + maxValue);
-				//System.out.println("min = "+ minValue);
-		
-				
-				int num = (int)Math.ceil((maxValue - minValue)/0.1);
-				
-				//System.out.println("num sections = "+num);
+				double totalNumInstances = (double)instances.size();								
 				double bestGainThisAttribute = 10.0;
 				double thresholdThisAttribute = 0.0;
 				
-
-				// loop over this attribute of the instances
 				int counter = 0;
 				double thisValue = (double)instances.get(counter).getAttributes().get(n).getValue();
 				double nextValue = (double)instances.get(counter).getAttributes().get(n).getValue();
@@ -127,61 +125,41 @@ public class ID3 {
 					// skip past equal attribute values
 					while(counter < (instances.size()-1) && nextValue == (double)instances.get(counter).getAttributes().get(n).getValue()){
 						++counter;
-					}
-					
+					}					
 					nextValue = (double)instances.get(counter).getAttributes().get(n).getValue();
-					//System.out.println("this value is "+thisValue);
-					//System.out.println("next value is "+nextValue);
 					
+					// take the midway point between the values
 					double threshold = (thisValue+nextValue)/2;
-					//System.out.println("threshold = "+threshold);
-					double barncount = 0.0;
-					double snowycount = 0.0;
-					double longearcount = 0.0;
+					// keep count of the instances found below the threshold
 					double insCount = 0.0;
 
+					double[] belowThresholdCounts = new double[classes.size()];
+					
 					for(Instance ins : instances){
 
 						if((double)ins.getAttributes().get(n).getValue() <= threshold){
 							++insCount;
-							if(ins.getAttributes().get(4).getValue().equals("BarnOwl")){
-								barncount++;
-							} else if (ins.getAttributes().get(4).getValue().equals("SnowyOwl")){
-								snowycount++;
-							} else if(ins.getAttributes().get(4).getValue().equals("LongEaredOwl")){
-								longearcount++;
-							}
+							
+							// keep count of each class below the threshold
+							for(String str : classes){
+								if(ins.getClassAttribute().equals(str)){
+									belowThresholdCounts[classes.indexOf(str)]++;
+								}
+							}							
 						}			
 					}
 					
-					double entropy1 = -1*(longearcount/insCount)*log(longearcount/insCount);
-					entropy1 += -1*(snowycount/insCount)*log(snowycount/insCount);
-					entropy1 += -1*(barncount/insCount)*log(barncount/insCount);
-					
-					double entropy2 = -1*((totlongearcount-longearcount)/(totalSize-insCount))*log((totlongearcount-longearcount)/(totalSize-insCount));//(Math.log((totlongearcount-longearcount)/(totalSize-insCount))/Math.log(2));
-					entropy2 += -1*((totsnowycount-snowycount)/(totalSize-insCount))*log((totsnowycount-snowycount)/(totalSize-insCount));
-					entropy2 += -1*((totbarncount-barncount)/(totalSize-insCount))*log((totbarncount-barncount)/(totalSize-insCount));
-					
-					
-//					double entropy1 = (totlongearcount/totalSize)*(-1*(longearcount/insCount)*log(longearcount/insCount));
-//					entropy1 += (totsnowycount/totalSize)*(-1*(snowycount/insCount)*log(snowycount/insCount));
-//					entropy1 += (totbarncount/totalSize)*(-1*(barncount/insCount)*log(barncount/insCount));
-//					
-//					double entropy2 = ((totalSize-totlongearcount)/totalSize)*(-1*((totlongearcount-longearcount)/(totalSize-insCount))*log((totlongearcount-longearcount)/(totalSize-insCount)));//(Math.log((totlongearcount-longearcount)/(totalSize-insCount))/Math.log(2));
-//					entropy2 += ((totalSize-totsnowycount)/totalSize)*(-1*((totsnowycount-snowycount)/(totalSize-insCount))*log((totsnowycount-snowycount)/(totalSize-insCount)));
-//					entropy2 += ((totalSize-totbarncount)/totalSize)*(-1*((totbarncount-barncount)/(totalSize-insCount))*log((totbarncount-barncount)/(totalSize-insCount)));
-//					
-//					double entS = -1*(totlongearcount/totalSize)*log(totlongearcount/totalSize);
-//					entS += -1*(totsnowycount/totalSize)*log(totlongearcount/totalSize);
-//					entS += -1*(totbarncount/totalSize)*log(totlongearcount/totalSize);
-					
-					
-					
-					double result = (entropy1 + entropy2);
+					double entropyBelowThreshold = 0;
+					double entropyAboveThreshold = 0;
+					for(int i = 0; i<classes.size();++i){
+						entropyBelowThreshold += -1*(belowThresholdCounts[i]/(insCount))*log(belowThresholdCounts[i]/(insCount));
+						entropyAboveThreshold += -1*(((double)totalCounts[i]-belowThresholdCounts[i])/(totalNumInstances-insCount))*log(((double)totalCounts[i]-belowThresholdCounts[i])/(totalNumInstances-insCount));
+					}				
+				
+					double result = (entropyBelowThreshold + entropyAboveThreshold);
 					if(result < bestGainThisAttribute){
 						bestGainThisAttribute = result;
-						thresholdThisAttribute = threshold;
-						
+						thresholdThisAttribute = threshold;						
 					}
 					//System.out.println();
 					thisValue = nextValue;
@@ -201,6 +179,9 @@ public class ID3 {
 			} // end for
 			
 			//System.out.println();
+			
+			// we have found the attribute that best separates the data, now sort the instances by this attribute
+			// so we can split it at the threshold
 			Collections.sort(instances, new Comparator<Instance>() {			
 				@Override
 				public int compare(Instance o1, Instance o2) {
@@ -209,7 +190,7 @@ public class ID3 {
 				}
 			});
 			
-
+			// put all the instances in two separate lists, one for each side of the threshold
 			List<Instance> leftList = new ArrayList<Instance>();
 			List<Instance> rightList = new ArrayList<Instance>();
 			for(Instance instance : instances){
@@ -219,12 +200,32 @@ public class ID3 {
 					rightList.add(instance);
 				}
 			}		
+			// remove this attribute from the list before recurring the method
 			attributesToTest.remove(attributesToTest.indexOf(atIndex));
+			// induce the tree with this attribute as the decisionnode
 			tree = new DecisionTree<>(atIndex, bestAttributeThreshold, ID3(leftList, attributesToTest),ID3(rightList, attributesToTest));			
 		}
 		return tree;		
 	}
 	
+	
+	private int[] countClasses(List<Instance> instances){
+		int[] counters = new int[classes.size()];
+		for(Instance ins : instances){
+			
+			for(String str : classes){
+				if(ins.getClassAttribute().equals(str)){
+					counters[classes.indexOf(str)]++;
+				}
+			}
+		}	
+		
+//		for(int i:counters){
+//			System.out.println(i);
+//		}
+//		System.out.println();
+		return counters;
+	}
 	
 	/**
 	 * @param instances
@@ -232,29 +233,17 @@ public class ID3 {
 	 */
 	private String getMajorityClass(List<Instance> instances) {
 		
-		int barncount = 0;
-		int snowycount = 0;
-		int longearcount = 0;
-		String[] majorityClass = {"BarnOwl", "SnowyOwl", "LongEaredOwl"};
+		int[] counters = countClasses(instances);
 
-		for(Instance ins : instances){
-	
-			if(ins.getAttributes().get(4).getValue().equals(majorityClass[0])){
-				barncount++;
-			} else if (ins.getAttributes().get(4).getValue().equals(majorityClass[1])){
-				snowycount++;
-			} else if(ins.getAttributes().get(4).getValue().equals(majorityClass[2])){
-				longearcount++;
-			}						
-		}				
-		int x = Math.max(Math.max(snowycount, longearcount), barncount);
-		if(barncount==x){
-			return majorityClass[0];
+		int max = 0;
+		int index = 0;
+		for(int i = 0;i<counters.length;++i){
+			if(max<counters[i]){
+				max=counters[i];
+				index = i;
+			}
 		}
-		if(snowycount == x){
-			return majorityClass[1];
-		}		
-		return majorityClass[2];
+		return classes.get(index);
 	}
 
 
@@ -264,14 +253,15 @@ public class ID3 {
 	 * @return
 	 */
 	private boolean allSameClass(List<Instance> instances) {
-
-		String firstClassFound = (String) instances.get(0).getAttributes().get(4).getValue();
+		
+		String firstClassFound = (String) instances.get(0).getClassAttribute();//.getAttributes().get(4).getValue();
 		// search thru' instances until it finds a different classification to the first one
 		for(Instance ins : instances){			
-			if(!ins.getAttributes().get(4).getValue().equals(firstClassFound)){
-				return false;
+			//if(!ins.getAttributes().get(4).getValue().equals(firstClassFound)){
+			if(!ins.getClassAttribute().equals(firstClassFound)){
+				return false;				
 			}
-		}			
+		}		
 		return true;
 	}
 

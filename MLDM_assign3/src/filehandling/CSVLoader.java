@@ -1,3 +1,4 @@
+package filehandling;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -26,12 +27,12 @@ public class CSVLoader {
 	//CsvReader csInput = null;
 
 	List<Instance> instances = new ArrayList<Instance>();
+	List<String> classes = new ArrayList<String>();
+	int numAttributes = 0;
 
 	public CSVLoader(String fileName){
 
-		//C:\Users\jtony_000\Google Drive\NUIG 2015\CT413 FYP\simulator_stats
-		//File file = new File( "C:\\Users\\jtony_000\\Google Drive\\NUIG 2015\\CT413 FYP\\simulator_stats\\file1.csv"); 
-		//File file = new File(filepath+filename+fileExtension);
+
 		BufferedReader fileReader = null;
 		try {
 			fileReader = new BufferedReader(new FileReader(fileName));
@@ -56,14 +57,16 @@ public class CSVLoader {
 
 			while ((line = fileReader.readLine()) != null) {
 
-				//Get all tokens available in line
-
 				tokens = line.split(",");
 
 				if (tokens.length > 0) {
 
+					numAttributes = tokens.length-1;
 					Instance instance = new Instance(lineCounter);
-					
+					instance.setClassAttribute(tokens[tokens.length-1]);
+					if(!classes.contains(instance.getClassAttribute())){
+						classes.add(instance.getClassAttribute());
+					}
 					for ( int i=0; i<tokens.length-1; ++i){
 						instance.addAttributeValue(Double.parseDouble(tokens[i]),null);
 					}
@@ -77,6 +80,10 @@ public class CSVLoader {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+//	for(String s:classes){
+//		System.out.println("classfound "+s);
+//	}
+		
 	}
 
 	/**
@@ -91,6 +98,34 @@ public class CSVLoader {
 	 */
 	public void setInstances(List<Instance> instances) {
 		this.instances = instances;
+	}
+
+	/**
+	 * @return the classes
+	 */
+	public List<String> getClasses() {
+		return classes;
+	}
+
+	/**
+	 * @param classes the classes to set
+	 */
+	public void setClasses(List<String> classes) {
+		this.classes = classes;
+	}
+
+	/**
+	 * @return the numAttributes
+	 */
+	public int getNumAttributes() {
+		return numAttributes;
+	}
+
+	/**
+	 * @param numAttributes the numAttributes to set
+	 */
+	public void setNumAttributes(int numAttributes) {
+		this.numAttributes = numAttributes;
 	}
 
 	public List<ArrayList<Instance>> getSplit(double trainingPercentage){
