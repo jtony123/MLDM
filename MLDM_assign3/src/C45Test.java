@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import classifier.C45;
 import data.Instance;
 import filehandling.CSVLoader;
 import filehandling.CSVOutput;
