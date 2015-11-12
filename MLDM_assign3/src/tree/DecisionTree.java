@@ -3,26 +3,27 @@
  */
 package tree;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import data.Instance;
-import data.Position;
 
 /**
  * @author Anthony Jackson
  * @id 11170365
  *
+ *	Adapted from Frank M. Carrano version of BinaryTree.
+ *
+ *	
  */
 public class DecisionTree<T> implements DecisionTreeInterface<T> {
 
-	//private static final long serialVersionUID = 1L;
 	private DecisionNodeInterface<T> root;
-	//private double thresholdMarker;
 
 	public DecisionTree()
 	{
 		root = null;
-	} // end default constructor
+	}
 
 	public DecisionTree(T rootData)
 	{
@@ -35,12 +36,6 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 		privateSetTree(rootData, threshold, attLabel, leftTree, rightTree);
 	} 
 	
-//	public DecisionTree(T rootData, DecisionTree<T> leftTree, 
-//			DecisionTree<T> rightTree)
-//	{
-//		privateSetTree(rootData, null, null, leftTree, rightTree);
-//	} 
-
 	public void setTree(T rootData)
 	{
 		root = new DecisionNode<T>(rootData);
@@ -51,13 +46,12 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	{
 		privateSetTree(rootData, null, null, (DecisionTree<T>)leftTree, 
 				(DecisionTree<T>)rightTree);
-	} // end setTree
+	}
 
-	// 26.08
 	private void privateSetTree(T rootData, T threshold, String attLabel, DecisionTree<T> leftTree, 
 			DecisionTree<T> rightTree)
 	{
-		//thresholdMarker = (double) threshold;
+
 		root = new DecisionNode<T>(rootData);
 		root.setThreshold((double) threshold);
 		root.setAttributeLabel(attLabel);
@@ -71,7 +65,7 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 				root.setRightChild(rightTree.root);
 			else
 				root.setRightChild(rightTree.root.copy());
-		} // end if
+		} 
 
 		if ((leftTree != null) && (leftTree != this))
 			leftTree.clear(); 
@@ -79,12 +73,6 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 		if ((rightTree != null) && (rightTree != this))
 			rightTree.clear();
 	}
-
-
-	private DecisionNode<T> copyNodes() // not essential
-	{
-		return (DecisionNode<T>)root.copy();
-	} 
 
 	public T getRootData()
 	{
@@ -119,118 +107,97 @@ public class DecisionTree<T> implements DecisionTreeInterface<T> {
 	{
 		return root;
 	} 
+	
 	public int getHeight()
 	{
 		return root.getHeight();
 	}
-
-
-	public void inorderTraverse() 
-	{
-		inorderTraverse(root);
-	} // end inorderTraverse
-
-	private void inorderTraverse(DecisionNodeInterface<T> node) 
-	{
-		if (node != null)
-		{			
-			inorderTraverse(node.getLeftChild());
-			System.out.println(node.getData());
-			inorderTraverse(node.getRightChild());
-		}
-	}
 	
-	public void preorderTraverse() 
+	public String displayTree() 
 	{
-		preorderTraverse(root);
-	}
-
-	private void preorderTraverse(DecisionNodeInterface<T> node) 
-	{
-		if (node != null)
-		{
-			System.out.println(node.getData());
-			System.out.println("going left");
-			preorderTraverse(node.getLeftChild());
-			System.out.println("goingright");
-			preorderTraverse(node.getRightChild());
-			System.out.println("up a level");
-		}
-	} 
-	
-	
-	
-	public void displayTree() 
-	{
-		int depth = 0;
-		displayTree(root, depth);
+		return displayTree(root);
 	} 
 
-	private void displayTree(DecisionNodeInterface<T> node, int depth) 
+	private String displayTree(DecisionNodeInterface<T> node) 
 	{
-		if (node != null)			
-		{
-			++depth;
+		StringBuilder sb = new StringBuilder();
+		Queue<DecisionNodeInterface> queue = new LinkedList<DecisionNodeInterface>();
+		
+		if (node != null)		
+		{		
+			sb.append("Overall height of tree = "+node.getHeight()+"\n\n");
+			sb.append("Legend: (*) denotes a leaf node containing the classification;\n");
+			sb.append("       <<*>> denotes a binary decision node with the threshold value;\n");
+			sb.append("       --O-- denotes each child of the binary decision node above\n\n");
+			queue.add(node);
+			String line="";			
 			
-			displayTree(node.getLeftChild(), depth);
-			
-			
-			String attributeLabel = null;
-			if(node.getAttributeLabel()!=null){
-				attributeLabel = node.getAttributeLabel();
-				for(int spaces = depth*2;spaces>=0;--spaces){
-					System.out.print(" ");
+			while(!queue.isEmpty()){
+				
+				int queueSize = queue.size();
+				DecisionNodeInterface<DecisionNode<T>> n = queue.remove();
+
+				if(queueSize%2==0){ // going left
+
+					if(n.getThreshold()>0){
+						line = "<<" + n.getAttributeLabel()+" <> "+n.getThreshold()+">>";					
+					} else {
+						line = "("+n.getData()+")";
+					}
+					line += "   <--O-->   ";
+					sb.append(line);
+					
+				} else { // going right
+					
+					if(n.getThreshold()>0){
+						line = "<<" + n.getAttributeLabel()+" <> "+n.getThreshold()+">>";
+												
+					} else {
+						line = "("+n.getData()+")";
+					}
+					sb.append(line+"\n\n");
 				}
-				System.out.print(attributeLabel + " : < " + node.getThreshold());
-			} else {
-				for(int spaces = depth;spaces>=0;--spaces){
-					System.out.print(" ");
+				
+				if(n.hasLeftChild()){
+					queue.add(n.getLeftChild());
+				} 
+				if(n.hasRightChild()){
+					queue.add(n.getRightChild());
 				}
-				System.out.println(node.getData());
-			}
-			
-			
-			displayTree(node.getRightChild(), depth);
+			}					
 		}
+		return sb.toString();
 	}
-	
 	
 	public T classify(Instance instance)
 	{
 	  return findEntry(getRootNode(), instance);
 	}
 
-	private T findEntry(DecisionNodeInterface<T> rootNode, Instance instance)
-	{	// header uses BinaryNodeInterface instead of BinaryNode
-		// to avoid cast of values returned from getLeftChild and
-		// getRightChild
+	private T findEntry(DecisionNodeInterface<T> decisionNode, Instance instance)
+	{	
+
 	  T result = null;
 	  
-	  if (rootNode != null)
+	  if (decisionNode != null)
 	  {
-		  // the root node data will contain which attribute to test
-		  // the data will also contain the threshold to test at
-	    T rootEntry = rootNode.getData();
+		  // the node data will contain which attribute to test, if not a leaf node
+	    T data = decisionNode.getData();
 	    
-	    // entry will be the instance being passed in, with the data telling it which attribute
-	    // to test for equality on
-	    if (rootEntry instanceof Integer){
+	    if (data instanceof Integer){
 	    	
-	    	//if((double)instance.getAttributes().get((int)rootEntry).getValue() <= thresholdMarker){
-	    	if((double)instance.getAttributes().get((int)rootEntry).getValue() <= rootNode.getThreshold()){
-	    		result = findEntry(rootNode.getLeftChild(), instance);
+	    	if((double)instance.getAttributes().get((int)data).getValue() <= decisionNode.getThreshold()){
+	    		result = findEntry(decisionNode.getLeftChild(), instance);
 	    	} else {
-	    		result = findEntry(rootNode.getRightChild(), instance);
+	    		result = findEntry(decisionNode.getRightChild(), instance);
 	    	}
 	    	
 	    } else {
-	    	result = rootEntry;
+	    	result = data;
 	    }
 	  }
 	  
 	  return result;
 	}
-
-
 
 }

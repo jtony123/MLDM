@@ -1,20 +1,16 @@
-/**
- * 
- */
+
 package tree;
 
 /**
  * @author Anthony Jackson
  * @id 11170365
- *
+ * 
+ * Adapted from Frank M. Carrano version of BinaryNode.
  */
 public class DecisionNode<T> implements DecisionNodeInterface<T> {
 
-  //private static final long serialVersionUID = 1L; // needed for serializable objects
-  
   private T data;
   
-  //private int attributeIndex;
   private double threshold;
   private String classification;
   private String attributeLabel;
@@ -24,20 +20,18 @@ public class DecisionNode<T> implements DecisionNodeInterface<T> {
   
   public DecisionNode()
   {
-    this(null); // call next constructor
-  } // end default constructor
+    this(null);
+  } 
   
   public DecisionNode(T dataPortion)
   {
-    this(dataPortion, null, null); // call next constructor
-  } // end constructor
+    this(dataPortion, null, null);
+  }
 
   public DecisionNode(T dataPortion, DecisionNode<T> leftChild,
 		  DecisionNode<T> rightChild)
   {
     data = dataPortion;
-    
-    
     left = leftChild;
     right = rightChild;
   } 
@@ -145,7 +139,7 @@ public T getData()
 
 	public int getHeight()
 	{
-	  return getHeight(this); // call private getHeight
+	  return getHeight(this);
 	}
 
 	private int getHeight(DecisionNode<T> node)

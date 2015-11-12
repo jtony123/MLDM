@@ -1,11 +1,10 @@
-/**
- * 
- */
 
 /**
  * @author Anthony Jackson
  * @id 11170365
  *
+ *	AttributeValue is used by instance to hold
+ *	all attributes bar the class attribute. 
  */
 public class AttributeValue {
 
@@ -45,9 +44,5 @@ public class AttributeValue {
 	 */
 	public void setStringValue(String stringValue) {
 		this.stringValue = stringValue;
-	}
-
-
-	
-	
+	}	
 }

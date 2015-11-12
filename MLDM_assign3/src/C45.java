@@ -1,3 +1,11 @@
+/**
+ /**
+ * @author Anthony Jackson
+ * @id 11170365
+ *
+ */
+
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -6,16 +14,8 @@ import java.util.List;
 import data.Instance;
 import tree.DecisionTree;
 
-/**
- * 
- */
 
-/**
- * @author Anthony Jackson
- * @id 11170365
- *
- */
-public class ID3 {
+public class C45 {
 	
 	public static int i = 0;
 	int atIndex = -1;
@@ -23,7 +23,7 @@ public class ID3 {
 	List<String> classes;
 	List<String> attributeLabels;
 
-	public ID3(){
+	public C45(){
 		
 	}
 	

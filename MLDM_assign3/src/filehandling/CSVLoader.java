@@ -1,4 +1,5 @@
 package filehandling;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,20 +9,21 @@ import java.util.List;
 
 import data.Instance;
 
-//import com.csvreader.CsvReader;
 
-
-/**
- * 
- */
 
 /**
  * @author Anthony Jackson
  * @id 11170365
  *
+ *	CSVLoader gets the headers and instances from a csv file.  The file
+ *	must have the headers in the top row, with the attribute values stacked in columns 
+ *	adjacent to each other.  The class attribute must be the last(rightmost) column.
+ *	It uses the count of headers to test for missing values in the instances, if any 
+ *	line is missing a value, it is ignored.  Hence it is important that all columns
+ *	have a header.
+ *  
  */
 public class CSVLoader {
-
 
 	List<Instance> instances = new ArrayList<Instance>();
 	List<String> classes = new ArrayList<String>();
@@ -37,6 +39,7 @@ public class CSVLoader {
 		String line ="";
 		String[] tokens;
 		int lineCounter = 0;
+		int tokenCount = 0;
 		
 		try {
 			fileReader = new BufferedReader(new FileReader(fileName));
@@ -44,6 +47,7 @@ public class CSVLoader {
 			// this first line should contain the attribute labels
 			line = fileReader.readLine();
 			tokens = line.split(",");
+			tokenCount = tokens.length;
 			for ( int i=0; i<tokens.length-1; ++i){
 				attributeLabels.add(tokens[i]);
 			}
@@ -54,7 +58,7 @@ public class CSVLoader {
 
 				tokens = line.split(",");
 
-				if (tokens.length > 0) {
+				if (tokens.length > 0 && tokens.length == tokenCount) {
 
 					numAttributes = tokens.length-1;
 					Instance instance = new Instance(lineCounter);
@@ -72,15 +76,43 @@ public class CSVLoader {
 				++lineCounter;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO return an error to the user
 			e.printStackTrace();
 		}
-//	for(String s:classes){
-//		System.out.println("classfound "+s);
-//	}
-		
 	}
 
+	
+	/**
+	 * Splits the full set of instances according to trainingPercentage
+	 * for training and the remainder for testing.  Each call to this method
+	 * shuffles the instances before splitting.
+	 * 
+	 * @param trainingPercentage
+	 * @return 2 lists of instances
+	 */
+	public List<ArrayList<Instance>> getSplit(double trainingPercentage){
+		
+		ArrayList<Instance> training = new ArrayList<Instance>();
+		ArrayList<Instance> testing = new ArrayList<Instance>();
+		
+		int numTrainingNeeded = (int)((double)instances.size()*trainingPercentage);
+		
+		Collections.shuffle(instances);
+		
+		int i = 0;
+		for(; i<numTrainingNeeded; ++i){			
+			training.add(instances.get(i));
+		}
+		for(;i<instances.size();++i){
+			testing.add(instances.get(i));
+		}
+		List<ArrayList<Instance>> bothLists = new ArrayList<>();
+		bothLists.add(training);
+		bothLists.add(testing);
+		
+		return bothLists;
+	}
+	
 	/**
 	 * @return the instances
 	 */
@@ -136,35 +168,6 @@ public class CSVLoader {
 	public void setNumAttributes(int numAttributes) {
 		this.numAttributes = numAttributes;
 	}
-
-	public List<ArrayList<Instance>> getSplit(double trainingPercentage){
-		
-		ArrayList<Instance> training = new ArrayList<Instance>();
-		ArrayList<Instance> testing = new ArrayList<Instance>();
-		
-		int numTrainingNeeded = (int)((double)instances.size()*trainingPercentage);
-		
-		Collections.shuffle(instances);
-		
-		int i = 0;
-		for(; i<numTrainingNeeded; ++i){			
-			training.add(instances.get(i));
-		}
-		for(;i<instances.size();++i){
-			testing.add(instances.get(i));
-		}
-		List<ArrayList<Instance>> bothLists = new ArrayList<>();
-		bothLists.add(training);
-		bothLists.add(testing);
-		
-		
-		return bothLists;
-	}
-	
-	
-	
-	
-	
 
 }
 
