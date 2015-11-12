@@ -14,8 +14,8 @@ import tree.DecisionTree;
  * @id 11170365
  *
  *	A modified version of Quinlans ID3 algorithm such 
- *	that it handles continuous(not nominal) data.
- *	Each step of Quinlans algorithm is included in the
+ *	that it handles numerical(not nominal) data.
+ *	Each step of Quinlan's algorithm is included in the
  *	code below.  
  *	
  *	In each iteration of the outer loop, the algorithm seeks the 

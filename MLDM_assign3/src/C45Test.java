@@ -68,7 +68,7 @@ public class C45Test {
 			String src = sourceFile.getText();
 			String dest = destinationFolder.getText();
 			if(sourceFile.getText().equals("")){
-				filePath = "C://Users//jtony_000//Google Drive//NUIG 2015//CT475 Machine Learning Data Mining//assignments//assign_3_files//owls15.csv";
+				filePath = "C://Users//jtony_000//Google Drive//NUIG 2015//CT475 Machine Learning Data Mining//assignments//assign_3_files//owls15a.csv";
 			} else {
 				filePath = src.replace("/", "//");
 			}
@@ -128,7 +128,7 @@ public class C45Test {
 					instance.setClassifiedAs(retrieved);
 					instance.setTestResult(instance.getClassAttribute().equals(retrieved)?"true":"false");
 					testresult.add(instance);
-					if(retrieved.equals(instance.getAttributes().get(4).getStringValue())){
+					if(retrieved.equals(instance.getClassAttribute())){
 						++correctCount;
 					}
 				}	
@@ -148,7 +148,7 @@ public class C45Test {
 				average += d;
 			}
 			int averageInt = (int)(average/accuracies.size()*100);
-			System.out.println("Average accuracy = " +average);		
+			System.out.println("Average accuracy = " +averageInt);		
 			
 			// write out the results to a file
 			CSVOutput csvOutput = new CSVOutput(destinationFile);
